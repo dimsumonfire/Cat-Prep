@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function isValidId(id) { return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    function isValidPaper(data) {
+      return data.keys().hasAll(['uid', 'year', 'createdAt', 'updatedAt']) &&
+             data.uid == request.auth.uid &&
+             data.year is string &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
+    function isValidQuestion(data) {
+      return data.keys().hasAll(['uid', 'type', 'section', 'questionText', 'createdAt', 'updatedAt']) &&
+             data.uid == request.auth.uid &&
+             data.type is string && (data.type == 'MCQ' || data.type == 'TITA') &&
+             data.section is string &&
+             data.questionText is string && data.questionText.size() <= 10000 &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
+    function isValidAttempt(data) {
+      return data.keys().hasAll(['uid', 'questionId', 'status', 'createdAt', 'updatedAt']) &&
+             data.uid == request.auth.uid &&
+             data.questionId is string &&
+             data.status is string &&
+             data.createdAt is number &&
+             data.updatedAt is number;
+    }
+
+    match /papers/{paperId} {
+      allow read: if isOwner(resource.data.uid);
+      allow create: if isValidId(paperId) && isOwner(incoming().uid) && isValidPaper(incoming());
+      allow update: if isOwner(existing().uid) && isValidPaper(incoming()) && incoming().uid == existing().uid && incoming().createdAt == existing().createdAt;
+      allow delete: if isOwner(existing().uid);
+      allow list: if isOwner(resource.data.uid);
+    }
+
+    match /questions/{questionId} {
+      allow read: if isOwner(resource.data.uid);
+      allow create: if isValidId(questionId) && isOwner(incoming().uid) && isValidQuestion(incoming());
+      allow update: if isOwner(existing().uid) && isValidQuestion(incoming()) && incoming().uid == existing().uid && incoming().createdAt == existing().createdAt;
+      allow delete: if isOwner(existing().uid);
+      allow list: if isOwner(resource.data.uid);
+    }
+
+    match /attempts/{attemptId} {
+      allow read: if isOwner(resource.data.uid);
+      allow create: if isValidId(attemptId) && isOwner(incoming().uid) && isValidAttempt(incoming());
+      allow update: if isOwner(existing().uid) && isValidAttempt(incoming()) && incoming().uid == existing().uid && incoming().createdAt == existing().createdAt;
+      allow delete: if isOwner(existing().uid);
+      allow list: if isOwner(resource.data.uid);
+    }
+  }
+}

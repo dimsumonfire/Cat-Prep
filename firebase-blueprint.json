@@ -1,0 +1,75 @@
+{
+  "entities": {
+    "catPaper": {
+      "title": "CAT Paper",
+      "description": "Metadata for imported CAT papers",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User ID" },
+        "year": { "type": "string" },
+        "slot": { "type": "string" },
+        "source": { "type": "string" },
+        "notes": { "type": "string" },
+        "createdAt": { "type": "number", "description": "Server timestamp" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["uid", "year", "createdAt", "updatedAt"]
+    },
+    "catQuestion": {
+      "title": "CAT Question",
+      "description": "Extracted question from a CAT paper",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "User ID who imported it" },
+        "paperId": { "type": "string" },
+        "type": { "type": "string", "enum": ["MCQ", "TITA"] },
+        "section": { "type": "string", "enum": ["VARC", "DILR", "QA"] },
+        "topic": { "type": "string" },
+        "difficulty": { "type": "string", "enum": ["Easy", "Medium", "Hard"] },
+        "instructions": { "type": "string" },
+        "questionText": { "type": "string" },
+        "options": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "correctAnswer": { "type": "string" },
+        "explanation": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["uid", "type", "section", "questionText", "createdAt", "updatedAt"]
+    },
+    "questionAttempt": {
+      "title": "Question Attempt",
+      "description": "User's attempt on an imported question",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "questionId": { "type": "string" },
+        "answerSelected": { "type": "string" },
+        "status": { "type": "string", "enum": ["Correct", "Wrong", "Skipped"] },
+        "timeTaken": { "type": "number" },
+        "errorType": { "type": "string" },
+        "notes": { "type": "string" },
+        "markForReview": { "type": "boolean" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["uid", "questionId", "status", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "papers": {
+      "schema": { "$ref": "#/entities/catPaper" },
+      "description": "User's imported CAT papers"
+    },
+    "questions": {
+      "schema": { "$ref": "#/entities/catQuestion" },
+      "description": "Extracted questions"
+    },
+    "attempts": {
+      "schema": { "$ref": "#/entities/questionAttempt" },
+      "description": "User attempts on questions"
+    }
+  }
+}

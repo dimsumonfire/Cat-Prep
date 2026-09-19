@@ -1,0 +1,6 @@
+{
+  "name": "CAT Prep Dashboard",
+  "description": "A comprehensive CAT exam preparation dashboard for Indian MBA aspirants, featuring syllabus trackers, mock test analysis, formula revision, previous-year papers, study schedules, and exam guidance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
